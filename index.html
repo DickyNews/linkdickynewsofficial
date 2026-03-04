@@ -88,8 +88,15 @@
             text-align: left; cursor: pointer;
         }
 
+        /* Gaya untuk tombol yang terkunci */
+        .task-item:disabled:not(.is-done):not(.is-checking) {
+            opacity: 0.3;
+            cursor: not-allowed;
+            filter: grayscale(1);
+        }
+
         .task-item:last-child { border-bottom: none; }
-        .task-item:hover { background: rgba(255, 204, 0, 0.08); color: #fff; }
+        .task-item:hover:not(:disabled) { background: rgba(255, 204, 0, 0.08); color: #fff; }
         .task-item i { width: 22px; text-align: center; font-size: 16px; color: var(--yellow); }
 
         .is-checking { background: rgba(255, 204, 0, 0.15) !important; cursor: wait; }
@@ -133,7 +140,7 @@ const params = new URLSearchParams(window.location.search);
 const app = document.getElementById("app");
 
 if(!params.get("v")){
-    // MODE GENERATOR (BUAT LINK)
+    // MODE GENERATOR
     app.innerHTML = `
         <i class="fas fa-bolt lock-icon"></i>
         <h2>LINK GENERATOR</h2>
@@ -155,7 +162,7 @@ if(!params.get("v")){
             </div>`;
     };
 } else {
-    // MODE UNLOCKER (PENGUNJUNG)
+    // MODE UNLOCKER
     let target;
     try {
         let b64 = params.get("v").replace(/-/g, '+').replace(/_/g, '/');
@@ -165,25 +172,32 @@ if(!params.get("v")){
     app.innerHTML = `
         <i class="fas fa-shield-alt lock-icon"></i>
         <h2>VERIFIKASI GANDA</h2>
-        <span class="sub-text">Selesaikan 2 langkah untuk membuka link</span>
+        <span class="sub-text">Selesaikan langkah secara berurutan</span>
         <div class="task-list" id="tasks"></div>
         <div id="final"></div>
     `;
 
-    let done = 0;
+    let doneCount = 0;
+    const taskButtons = [];
+
     mySocials.forEach((s, idx) => {
         let b = document.createElement("button");
         b.className = "task-item";
         b.innerHTML = `<i class="${s.i}"></i> <span>${s.n}</span>`;
         b.dataset.attempts = "0";
+        
+        // Kunci semua langkah kecuali yang pertama (index 0)
+        if(idx > 0) {
+            b.disabled = true;
+        }
 
         b.onclick = () => {
-            if(b.classList.contains("is-done") || b.disabled) return;
+            if(b.classList.contains("is-done") || b.classList.contains("is-checking")) return;
             
             window.open(s.l, "_blank");
-            b.disabled = true;
             b.classList.remove("is-error");
             b.classList.add("is-checking");
+            b.disabled = true;
             
             let timeLeft = 10; 
             const timer = setInterval(() => {
@@ -192,28 +206,44 @@ if(!params.get("v")){
 
                 if(timeLeft < 0) {
                     clearInterval(timer);
-                    b.disabled = false;
-                    b.classList.remove("is-checking");
                     
                     let att = parseInt(b.dataset.attempts);
                     if(att === 0) {
+                        // Percobaan pertama gagal
                         b.dataset.attempts = "1";
+                        b.disabled = false;
+                        b.classList.remove("is-checking");
                         b.classList.add("is-error");
                         b.innerHTML = `<i class="fas fa-times-circle"></i> <span>Gagal! Silakan coba lagi</span>`;
                     } else {
+                        // Berhasil
+                        b.classList.remove("is-checking");
                         b.classList.add("is-done");
                         b.innerHTML = `<i class="fas fa-check-circle"></i> <span>BERHASIL</span>`;
-                        done++;
-                        if(done >= mySocials.length) {
+                        b.disabled = true; // Tetap disable karena sudah selesai
+                        
+                        doneCount++;
+
+                        // Buka kunci langkah berikutnya jika ada
+                        if(taskButtons[idx + 1]) {
+                            taskButtons[idx + 1].disabled = false;
+                        }
+
+                        // Jika semua selesai, tampilkan tombol download
+                        if(doneCount >= mySocials.length) {
                             document.getElementById('final').innerHTML = `
-                                <button class="btn-download" onclick="window.location.href='${target}'">
-                                    <i class="fas fa-download"></i> DOWNLOAD SEKARANG
-                                </button>`;
+                                <div data-aos="zoom-in">
+                                    <button class="btn-download" onclick="window.location.href='${target}'">
+                                        <i class="fas fa-download"></i> DOWNLOAD SEKARANG
+                                    </button>
+                                </div>`;
                         }
                     }
                 }
             }, 1000);
         };
+        
+        taskButtons.push(b);
         document.getElementById("tasks").appendChild(b);
     });
 }

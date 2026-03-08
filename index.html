@@ -4,249 +4,192 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dicky News | Premium Link Unlocker</title>
-    
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
     
     <style>
-        :root {
-            --bg: #020202;
-            --glass: rgba(18, 18, 18, 0.9);
-            --yellow: #ffcc00;
-            --yellow-glow: rgba(255, 204, 0, 0.4);
-            --border-color: rgba(255, 255, 255, 0.1);
-            --text: #ffffff;
-            --error: #ff4444;
-        }
-
-        * { 
-            box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent; 
-            user-select: none;
+        :root { 
+            --ios-blue: #007AFF; 
+            --glass: rgba(255, 255, 255, 0.92); 
+            --bg: #f2f2f7; 
+            --text: #1c1c1e; 
+            --green: #28a745; 
+            --red: #ff3b30;
         }
         
-        body {
-            margin: 0; background-color: var(--bg); color: var(--text);
-            font-family: '-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            height: 100vh; width: 100vw; overflow: hidden;
-            display: flex; align-items: center; justify-content: center;
-            background: radial-gradient(circle at 50% 50%, #1a1a00 0%, #000 90%);
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            background: var(--bg); color: var(--text); 
+            font-family: 'Roboto', sans-serif; 
+            overflow: hidden; 
+        }
+        
+        #constellationCanvas { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            z-index: 0; pointer-events: none; 
         }
 
-        .ambient-glow {
-            position: absolute; width: 400px; height: 400px;
-            background: var(--yellow); filter: blur(150px);
-            opacity: 0.1; z-index: 1; border-radius: 50%;
-            pointer-events: none;
+        .container { 
+            min-height: 100vh; display: flex; align-items: center; 
+            justify-content: center; padding: 20px; position: relative; z-index: 1; 
         }
 
-        .wrapper { width: 90%; max-width: 400px; z-index: 100; perspective: 1200px; }
-
-        .box {
-            background: var(--glass);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            padding: 35px 25px;
-            border-radius: 35px;
-            border: 1px solid var(--border-color);
-            text-align: center;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.7);
+        .glass-card { 
+            background: var(--glass); 
+            backdrop-filter: blur(25px); 
+            border-radius: 40px; 
+            padding: 40px; 
+            width: 100%; 
+            max-width: 480px; 
+            text-align: center; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.08); 
+            border: 1px solid rgba(255, 255, 255, 0.5); 
+            box-sizing: border-box;
         }
 
-        .lock-icon {
-            font-size: 50px; color: var(--yellow);
-            filter: drop-shadow(0 0 15px var(--yellow-glow));
-            margin-bottom: 20px;
-            animation: float 4s ease-in-out infinite;
-            display: inline-block;
+        h2 { font-weight: 700; margin: 0 0 15px 0; font-size: 26px; }
+        .desc { font-size: 14px; color: #3a3a3c; margin-bottom: 30px; line-height: 1.5; }
+
+        @keyframes pulse-active {
+            0% { transform: scale(1); box-shadow: 0 5px 15px rgba(0, 122, 255, 0.1); }
+            50% { transform: scale(1.03); box-shadow: 0 10px 25px rgba(0, 122, 255, 0.2); }
+            100% { transform: scale(1); box-shadow: 0 5px 15px rgba(0, 122, 255, 0.1); }
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+        .task-item { 
+            background: #fff; 
+            border: 1.5px solid #e5e5ea; 
+            padding: 18px 22px; 
+            margin: 12px 0; 
+            border-radius: 20px; 
+            display: flex; 
+            align-items: center; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            width: 100%; 
+            box-sizing: border-box; 
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+            text-align: left;
         }
 
-        h2 { font-size: 18px; font-weight: 900; margin: 0; color: var(--yellow); letter-spacing: 2px; text-transform: uppercase; }
-        .sub-text { color: #aaa; font-size: 11px; margin-top: 8px; margin-bottom: 25px; display: block; }
-
-        .task-list {
-            display: flex; flex-direction: column;
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            overflow: hidden;
-            background: rgba(255, 255, 255, 0.02);
+        .task-item:disabled { cursor: not-allowed; opacity: 0.6; }
+        .is-checking { border-color: var(--ios-blue); }
+        .is-error { border-color: var(--red) !important; color: var(--red) !important; }
+        .is-done { background: var(--green) !important; color: #fff !important; border: none; }
+        
+        .btn-main { 
+            background: var(--ios-blue); 
+            color: #fff; 
+            border: none; 
+            padding: 18px; 
+            width: 100%; 
+            border-radius: 20px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            margin-top: 20px; 
+            font-size: 16px;
         }
-
-        .task-item {
-            width: 100%; padding: 18px 20px;
-            background: transparent; border: none;
-            border-bottom: 1px solid var(--border-color);
-            display: flex; align-items: center;
-            gap: 15px; color: #ddd;
-            font-size: 13px; font-weight: 600;
-            transition: 0.3s;
-            text-align: left; cursor: pointer;
-        }
-
-        /* Gaya untuk tombol yang terkunci */
-        .task-item:disabled:not(.is-done):not(.is-checking) {
-            opacity: 0.3;
-            cursor: not-allowed;
-            filter: grayscale(1);
-        }
-
-        .task-item:last-child { border-bottom: none; }
-        .task-item:hover:not(:disabled) { background: rgba(255, 204, 0, 0.08); color: #fff; }
-        .task-item i { width: 22px; text-align: center; font-size: 16px; color: var(--yellow); }
-
-        .is-checking { background: rgba(255, 204, 0, 0.15) !important; cursor: wait; }
-        .is-error { background: rgba(255, 68, 68, 0.1) !important; color: var(--error) !important; }
-        .is-done { background: var(--yellow) !important; color: #000 !important; font-weight: 800; }
-        .is-done i { color: #000 !important; }
-
-        .btn-download {
-            width: 100%; padding: 16px; border-radius: 18px;
-            margin-top: 20px; border: none; font-weight: 800;
-            background: var(--yellow); color: #000;
-            font-size: 14px; text-transform: uppercase;
-            cursor: pointer; transition: 0.3s;
-        }
-
-        .custom-input {
-            width:100%; padding:14px; border-radius:12px; 
-            border:1px solid var(--border-color); background:rgba(0,0,0,0.4); 
-            color:#fff; text-align:center; margin-bottom:15px; outline:none;
-        }
+        
+        .custom-input { width:100%; padding:18px; border-radius:15px; border:1.5px solid #d1d1d6; margin-bottom:15px; box-sizing:border-box; }
     </style>
 </head>
 <body>
 
-<div class="ambient-glow" id="ambient"></div>
+<canvas id="constellationCanvas"></canvas>
 
-<div class="wrapper">
-    <div class="box" id="app" data-aos="fade-up"></div>
+<div class="container">
+    <div class="glass-card" id="app"></div>
 </div>
 
-<script src="https://unpkg.com/aos@next/dist/aos.js"></script>
 <script>
-// TUGAS SESUAI PERMINTAAN ANDA
-const mySocials = [
-    { n: "Subscribe & Hit Bell YouTube", i: "fab fa-youtube", l: "https://www.youtube.com/@dickynewsofficial" },
-    { n: "Like & Comment Video", i: "fas fa-heart", l: "https://youtu.be/g7ekOGN3MhM" }
-];
-
-AOS.init({ duration: 1000, once: true });
-const params = new URLSearchParams(window.location.search);
-const app = document.getElementById("app");
-
-if(!params.get("v")){
-    // MODE GENERATOR
-    app.innerHTML = `
-        <i class="fas fa-bolt lock-icon"></i>
-        <h2>LINK GENERATOR</h2>
-        <span class="sub-text">Masukkan link tujuan di bawah ini</span>
-        <input id="inp" class="custom-input" placeholder="Paste Link Disini...">
-        <button class="btn-download" onclick="buat()">Generate Link</button>
-        <div id="res"></div>
-    `;
-
-    window.buat = function(){
-        const val = document.getElementById("inp").value.trim();
-        if(!val) return alert("Isi link dulu!");
-        const encoded = btoa(val).replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');
-        const finalUrl = window.location.origin + window.location.pathname + "?v=" + encoded;
-        document.getElementById("res").innerHTML = `
-            <div style="margin-top:20px;">
-                <input readonly value="${finalUrl}" onclick="this.select(); document.execCommand('copy'); alert('Link disalin!');" 
-                style="width:100%; padding:12px; border:1px solid var(--yellow); background:transparent; color:var(--yellow); font-size:11px; border-radius:10px; text-align:center;">
-            </div>`;
-    };
-} else {
-    // MODE UNLOCKER
-    let target;
-    try {
-        let b64 = params.get("v").replace(/-/g, '+').replace(/_/g, '/');
-        target = atob(b64);
-    } catch(e) { target = "#"; }
-
-    app.innerHTML = `
-        <i class="fas fa-shield-alt lock-icon"></i>
-        <h2>VERIFIKASI GANDA</h2>
-        <span class="sub-text">Selesaikan langkah secara berurutan</span>
-        <div class="task-list" id="tasks"></div>
-        <div id="final"></div>
-    `;
-
-    let doneCount = 0;
-    const taskButtons = [];
-
-    mySocials.forEach((s, idx) => {
-        let b = document.createElement("button");
-        b.className = "task-item";
-        b.innerHTML = `<i class="${s.i}"></i> <span>${s.n}</span>`;
-        b.dataset.attempts = "0";
-        
-        // Kunci semua langkah kecuali yang pertama (index 0)
-        if(idx > 0) {
-            b.disabled = true;
+    // Canvas Animation
+    const canvas = document.getElementById('constellationCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    window.onresize = resize; resize();
+    function animate() {
+        ctx.fillStyle = 'rgba(242, 242, 247, 0.25)'; 
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        if(particles.length < 150) {
+            let side = Math.floor(Math.random() * 4);
+            let x, y, vx, vy;
+            if(side === 0) { x = Math.random()*canvas.width; y = -20; vx = (Math.random()-0.5)*12; vy = Math.random()*10+5; }
+            else if(side === 1) { x = Math.random()*canvas.width; y = canvas.height+20; vx = (Math.random()-0.5)*12; vy = -Math.random()*10-5; }
+            else if(side === 2) { x = -20; y = Math.random()*canvas.height; vx = Math.random()*10+5; vy = (Math.random()-0.5)*12; }
+            else { x = canvas.width+20; y = Math.random()*canvas.height; vx = -Math.random()*10-5; vy = (Math.random()-0.5)*12; }
+            particles.push({ x, y, px: x, py: y, vx, vy, size: Math.random()*2+1, color: `hsl(${Math.random()*360}, 70%, 65%)` });
         }
+        particles.forEach((p, i) => {
+            p.px = p.x; p.py = p.y;
+            p.x += p.vx; p.y += p.vy;
+            ctx.beginPath();
+            ctx.strokeStyle = p.color;
+            ctx.lineWidth = p.size;
+            ctx.lineCap = 'round';
+            ctx.moveTo(p.px, p.py);
+            ctx.lineTo(p.x, p.y);
+            ctx.stroke();
+            if(p.x < -100 || p.x > canvas.width+100 || p.y < -100 || p.y > canvas.height+100) particles.splice(i, 1);
+        });
+        requestAnimationFrame(animate);
+    }
+    animate();
 
-        b.onclick = () => {
-            if(b.classList.contains("is-done") || b.classList.contains("is-checking")) return;
-            
-            window.open(s.l, "_blank");
-            b.classList.remove("is-error");
-            b.classList.add("is-checking");
-            b.disabled = true;
-            
-            let timeLeft = 10; 
-            const timer = setInterval(() => {
-                b.innerHTML = `<i class="fas fa-spinner fa-spin"></i> <span>Mengecek... ${timeLeft}s</span>`;
-                timeLeft--;
+    // Data Tasks (Tetap sama)
+    const mySocials = [
+        { n: "Subscribe & Hit Bell YouTube", i: "fab fa-youtube", l: "https://www.youtube.com/@dickynewsofficial" },
+        { n: "Like & Comment Video", i: "fas fa-heart", l: "https://youtu.be/g7ekOGN3MhM" }
+    ];
 
-                if(timeLeft < 0) {
-                    clearInterval(timer);
-                    
-                    let att = parseInt(b.dataset.attempts);
-                    if(att === 0) {
-                        // Percobaan pertama gagal
-                        b.dataset.attempts = "1";
-                        b.disabled = false;
-                        b.classList.remove("is-checking");
-                        b.classList.add("is-error");
-                        b.innerHTML = `<i class="fas fa-times-circle"></i> <span>Gagal! Silakan coba lagi</span>`;
-                    } else {
-                        // Berhasil
+    const params = new URLSearchParams(window.location.search);
+    const app = document.getElementById("app");
+
+    if(!params.get("v")){
+        app.innerHTML = `<h2>LINK GENERATOR</h2><p class="desc">Tempel URL tujuan untuk membuat link unlocker.</p><input id="inp" class="custom-input" placeholder="Paste Link Tujuan..."> <button class="btn-main" style="background:#1c1c1e" onclick="buat()">Generate Link</button><div id="res"></div>`;
+        window.buat = function(){
+            const val = document.getElementById("inp").value.trim();
+            if(!val) return;
+            const encoded = btoa(val).replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');
+            const final = window.location.origin + window.location.pathname + "?v=" + encoded;
+            document.getElementById("res").innerHTML = `<div style="margin-top:20px; padding:15px; background:#fff; border-radius:15px; font-size:11px; word-break:break-all; text-align:left;"><strong>Link Anda:</strong><br>${final}</div>`;
+        };
+    } else {
+        let target;
+        try { target = atob(params.get("v").replace(/-/g, '+').replace(/_/g, '/')); } catch(e) { target = "#"; }
+        app.innerHTML = `<h2>VERIFIKASI</h2><p class="desc">Selesaikan langkah-langkah di bawah ini untuk membuka link.</p><div id="tasks"></div><div id="final"></div>`;
+        
+        mySocials.forEach((s, idx) => {
+            let b = document.createElement("button");
+            b.className = "task-item";
+            if(idx > 0) b.disabled = true;
+            b.innerHTML = `<i class="${s.i}" style="margin-right:15px; width:20px;"></i><span>${s.n}</span>`;
+            
+            b.onclick = () => {
+                if(b.classList.contains("is-done") || b.classList.contains("is-checking")) return;
+                window.open(s.l, "_blank");
+                b.classList.add("is-checking");
+                let count = 10;
+                let timer = setInterval(() => {
+                    b.innerHTML = `<span>Sedang verifikasi... ${count}s</span>`;
+                    if(count-- <= 0) {
+                        clearInterval(timer);
                         b.classList.remove("is-checking");
                         b.classList.add("is-done");
-                        b.innerHTML = `<i class="fas fa-check-circle"></i> <span>BERHASIL</span>`;
-                        b.disabled = true; // Tetap disable karena sudah selesai
-                        
-                        doneCount++;
-
-                        // Buka kunci langkah berikutnya jika ada
-                        if(taskButtons[idx + 1]) {
-                            taskButtons[idx + 1].disabled = false;
-                        }
-
-                        // Jika semua selesai, tampilkan tombol download
-                        if(doneCount >= mySocials.length) {
-                            document.getElementById('final').innerHTML = `
-                                <div data-aos="zoom-in">
-                                    <button class="btn-download" onclick="window.location.href='${target}'">
-                                        <i class="fas fa-download"></i> DOWNLOAD SEKARANG
-                                    </button>
-                                </div>`;
+                        b.innerHTML = `<i class="fas fa-check" style="margin-right:15px;"></i><span>BERHASIL</span>`;
+                        if(document.querySelectorAll(".is-done").length === mySocials.length) {
+                            document.getElementById("final").innerHTML = `<button class="btn-main" onclick="window.location.href='${target}'">AKSES LINK TUJUAN</button>`;
+                        } else {
+                            document.querySelectorAll(".task-item")[idx+1].disabled = false;
                         }
                     }
-                }
-            }, 1000);
-        };
-        
-        taskButtons.push(b);
-        document.getElementById("tasks").appendChild(b);
-    });
-}
+                }, 1000);
+            };
+            document.getElementById("tasks").appendChild(b);
+        });
+    }
 </script>
 </body>
 </html>

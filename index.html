@@ -43,7 +43,7 @@
         .task-content { display: flex; align-items: center; flex: 1; }
         .task-content i { font-size: 20px; margin-right: 15px; width: 25px; text-align: center; }
         .btn-main { background: var(--ios-blue); color: #fff; border: none; padding: 18px; width: 100%; border-radius: 20px; font-weight: 700; cursor: pointer; margin-top: 20px; display: none; font-size: 16px; }
-        .yt { color: #ff0000; } .ig { color: #e1306c; }
+        .yt { color: #ff0000; } .heart { color: #e1306c; }
     </style>
 </head>
 <body>
@@ -52,6 +52,7 @@
 <div class="container"><div class="glass-card" id="app"></div></div>
 
 <script>
+    // Canvas Animation
     const canvas = document.getElementById('constellationCanvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
@@ -78,9 +79,10 @@
     }
     animate();
 
+    // TUGAS ASLI DARI WEB 2
     const mySocials = [
-        { n: "Subscribe YouTube Utama", i: "fab fa-youtube yt", link: "https://youtube.com/@dickynews", verb: "subscribe" },
-        { n: "Follow Instagram", i: "fab fa-instagram ig", link: "https://www.instagram.com/dickynews", verb: "follow" }
+        { n: "Subscribe & Hit Bell YouTube", i: "fab fa-youtube yt", l: "https://www.youtube.com/@dickynewsofficial" },
+        { n: "Like & Comment Video", i: "fas fa-heart heart", l: "https://youtu.be/g7ekOGN3MhM" }
     ];
 
     const params = new URLSearchParams(window.location.search);
@@ -90,7 +92,7 @@
         if(!params.get("v")) {
             app.innerHTML = `<h2>LINK GENERATOR</h2><p class="desc">Tempel URL tujuan untuk membuat link unlocker.</p><input id="link" style="width:100%; padding:18px; border-radius:15px; border:1.5px solid #d1d1d6; margin-bottom:15px; box-sizing:border-box;" placeholder="Paste URL Tujuan..."> <button class="btn-main" style="display:block; background:#1c1c1e" onclick="generate()">Generate Link</button><div id="res"></div>`;
         } else {
-            app.innerHTML = `<h2>VERIFIKASI</h2><p class="desc">Selesaikan langkah-langkah di bawah ini untuk membuka link.</p><div id="tasks"></div><button id="finalLink" class="btn-main" onclick="window.location.href=atob(params.get('v'))">AKSES LINK TUJUAN</button>`;
+            app.innerHTML = `<h2>VERIFIKASI</h2><p class="desc">Selesaikan langkah-langkah di bawah ini untuk membuka link.</p><div id="tasks"></div><button id="finalLink" class="btn-main" onclick="window.location.href=atob(params.get('v').replace(/-/g, '+').replace(/_/g, '/'))">AKSES LINK TUJUAN</button>`;
             const tasksContainer = document.getElementById("tasks");
             mySocials.forEach((s, idx) => {
                 let b = document.createElement("button");
@@ -100,18 +102,18 @@
                 b.innerHTML = `<div class="task-content"><i class="${s.i}"></i><span>${s.n}</span></div>`;
                 b.onclick = () => {
                     if(!b.classList.contains("is-active") || b.classList.contains("is-done") || b.disabled) return;
-                    window.open(s.link, "_blank");
+                    window.open(s.l, "_blank");
                     b.disabled = true;
                     b.classList.remove("is-error");
                     let count = 15;
                     let timer = setInterval(() => {
-                        b.innerHTML = `<div class="task-content"><span>Sedang verifikasi ${s.n}... ${count}s</span></div>`;
+                        b.innerHTML = `<div class="task-content"><span>Sedang memverifikasi... ${count}s</span></div>`;
                         if(count-- <= 0) {
                             clearInterval(timer);
                             b.disabled = false;
                             if(parseInt(b.dataset.attempt) === 1) {
                                 b.classList.add("is-error");
-                                b.innerHTML = `<div class="task-content"><i class="fas fa-exclamation-circle"></i><span>Gagal verifikasi. Klik lagi & pastikan sudah ${s.verb} ${s.n.split(' ').slice(1).join(' ')}</span></div>`;
+                                b.innerHTML = `<div class="task-content"><i class="fas fa-exclamation-circle"></i><span>Sistem gagal memverifikasi. Klik tombol ini lagi dan pastikan tugas selesai!</span></div>`;
                                 b.dataset.attempt = "2";
                             } else {
                                 b.classList.remove("is-active", "is-error");
@@ -131,7 +133,8 @@
     window.generate = () => {
         let url = document.getElementById('link').value;
         if(url) {
-            let final = window.location.origin + window.location.pathname + "?v=" + btoa(url);
+            let encoded = btoa(url).replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');
+            let final = window.location.origin + window.location.pathname + "?v=" + encoded;
             document.getElementById('res').innerHTML = `<div style="margin-top:20px; padding:15px; background:#fff; border-radius:15px; font-size:11px; word-break:break-all; text-align:left;"><strong>Link Anda:</strong><br>${final}</div>`;
         }
     };
